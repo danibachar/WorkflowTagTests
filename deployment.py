@@ -3,11 +3,27 @@
 import os
 import re
 import logging
+
+from github import Github
+
+# Authentication is defined via github.Auth
+from github import Auth
+
+
 print("LOG_LEVEL = {}".format(os.environ.get("LOG_LEVEL", "INFO")))
 if os.environ["LOG_LEVEL"] == "DEBUG":
     logging.basicConfig(filename='deploy.log', level=logging.DEBUG)
 else:
     logging.basicConfig(filename='deploy.log', level=logging.INFO)
+
+access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
+if access_token is None:
+    raise Exception("No access token, cannot authenticate with GitHub")
+
+# using an access token
+auth = Auth.Token("access_token")
+# Public Web Github
+g = Github(auth=auth)
 
 # parameters
 repo_url = 'https://github.com/danibachar/HomebrewAutoDeplyment'
