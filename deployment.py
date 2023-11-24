@@ -33,11 +33,11 @@ branch_prefix = 'release_'
 
 # fetch all tags
 tags = os.popen('git ls-remote --tags').read()
-logging.info('tags {}'.format(tags))
+logging.debug('tags {}'.format(tags))
 
 # parse tags and get the latest one
 tag_list = re.findall(r'refs/tags/(.+)', tags)
-print('tag_list {}'.format(tag_list))
+logging.debug('tag_list {}'.format(tag_list))
 
 latest_tag = tag_list[-1] if tag_list else None
 if latest_tag is None:
@@ -55,7 +55,7 @@ if latest_tag is None:
 branch = "{}@{}".format(branch_prefix, latest_tag)
 # # create and checkout new branch
 # os.system(f'git checkout -b {branch}')
-logging.info('new branch {}'.format(branch))
+logging.debug('new branch {}'.format(branch))
 
 # # create a new file
 # new_formula_file_name = f"tuist@{latest_tag}.rb"
