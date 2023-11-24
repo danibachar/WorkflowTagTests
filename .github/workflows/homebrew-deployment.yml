@@ -20,4 +20,4 @@ jobs:
       - name: Dependencies
         run: pip install -r requirements.txt
       - name: Deploy new Homebrew formula
-        run: ./deployment.py
+        run: python -u deployment.py
