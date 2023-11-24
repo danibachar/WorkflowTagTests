@@ -1,0 +1,12 @@
+name: Deployment
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy new Homebrew formula
+        run: ./deployment.py
