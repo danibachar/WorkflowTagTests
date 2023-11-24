@@ -3,7 +3,7 @@
 import os
 import re
 import logging
-
+print("LOG_LEVEL = {}".format(os.environ.get("LOG_LEVEL", "INFO")))
 if os.environ["LOG_LEVEL"] == "DEBUG":
     logging.basicConfig(filename='deploy.log', level=logging.DEBUG)
 else:
