@@ -17,6 +17,7 @@ else:
     logging.basicConfig(filename='deploy.log', level=logging.INFO)
 
 access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
+
 if access_token is None:
     raise Exception("No access token, cannot authenticate with GitHub")
 
