@@ -4,6 +4,9 @@ on:
     tags:
       - '*'
 
+env:
+  LOG_LEVEL: DEBUG
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
