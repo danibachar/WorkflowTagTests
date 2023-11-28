@@ -124,10 +124,10 @@ def _commit_and_push(branch, message):
     os.system(f'git push --set-upstream origin {branch}')
 
 # MARK: - GitHub Operations
-
+access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
 def _github_auth():
     logging.debug('Starting Authentication')
-    access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
+    
     if access_token is None:
         raise Exception("No access token, cannot authenticate with GitHub")
     # using an access token
@@ -166,11 +166,21 @@ logging.debug(f'Creating PR from branch {branch}')
 # get the repo by name
 repo = g.get_repo(full_repo_name)
 # create a GitHub pull request
-pr = repo.create_pull(
-    title=f"Release {tag}",
-    body='Created from automated script',
-    head=f"danibachar:{branch}",
-    base='main'
-)
+pr_command = f'''
+curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer {access_token}" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/repos/danibachar/HomebrewAutoDeplyment/pulls \
+  -d '{{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"danibachar:{branch}","base":"main"}}'
+'''
+pr = _run_command(pr_command)
+# pr = repo.create_pull(
+#     title=f"Release {tag}",
+#     body='Created from automated script',
+#     head=f"danibachar:{branch}",
+#     base='main'
+# )
 logging.info(f"created new PR {pr}")
 
