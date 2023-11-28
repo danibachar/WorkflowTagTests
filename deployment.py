@@ -169,7 +169,7 @@ repo = g.get_repo(full_repo_name)
 pr = repo.create_pull(
     title=f"Release {tag}",
     body='Created from automated script',
-    head=branch,
+    head=f"danibachar:{branch}",
     base='main'
 )
 logging.info(f"created new PR {pr}")
