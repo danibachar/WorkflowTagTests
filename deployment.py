@@ -106,10 +106,11 @@ def _prepare_repo_locally():
     # navigate into the cloned repo (given the default clone command, the folder name would be the repository name)
     repo_name = repo_url.split('/')[-1].replace('.git', '')
     os.chdir(repo_name)
-    email = os.environ.get("GIT_AUTHOR_EMAIL")
-    user = os.environ.get("GITLAB_USER_ID")
-    _run_command(f"git config --local user.email {email}")
-    _run_command(f"git config --local user.name {user}")
+    
+    # email = os.environ.get("GIT_AUTHOR_EMAIL")
+    # user = os.environ.get("GITLAB_USER_ID")
+    # _run_command(f"git config --local user.email {email}")
+    # _run_command(f"git config --local user.name {user}")
 
 def _checkout_branch_by(tag):
     # create branch name from the latest tag
@@ -125,7 +126,7 @@ def _commit_and_push(branch, message):
     # commit changes
     _run_command(f'git commit -m \"{message}\"')
     # push changes
-    _run_command(f'git push --set-upstream origin {branch}')
+    logging.debug(_run_command(f'git push {branch}'))
 
 # MARK: - GitHub Operations
 
