@@ -173,7 +173,7 @@ curl -L \
   -H "Authorization: Bearer {access_token}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/danibachar/HomebrewAutoDeplyment/pulls \
-  -d '{{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"danibachar:{branch}","base":"main"}}'
+  -d '{{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"{branch}","base":"main"}}'
 '''
 pr = _run_command(pr_command)
 # pr = repo.create_pull(
