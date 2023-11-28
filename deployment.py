@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 
-import os
-import re
-import logging
-
+import os, re, logging, subprocess
 from github import Github, Auth
 
 # Constants
 full_repo_name = "danibachar/HomebrewAutoDeplyment"
 repo_url = f'https://github.com/{full_repo_name}'
 branch_prefix = 'release'
-template_name = "../tuist-formula-template.rb"
+
+# MARK: - Helpers
+
+def _run_command(command):
+    return subprocess.run(command, shell=True, capture_output=True, text=True).stdout
 
 def _set_logging():
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
@@ -20,6 +21,51 @@ def _set_logging():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)\
+
+# MARK: - Formula builder
+
+def _create_new_formula(
+    template_name, 
+    new_formula_file_name, 
+    formula_placeholder,
+    sha_placeholder,
+    url_placeholder
+):
+    os.system(f'cp {template_name} ./{new_formula_file_name}')
+    os.system(f"sed -ir \"s/_FORMULA_/{formula_placeholder}/g\" ./{new_formula_file_name}")
+    os.system(f"sed -ir \"s/_SHA_/\"{sha_placeholder}\"/g\" ./{new_formula_file_name}")
+    os.system(f"sed -ir \"s/_URL_/\"{url_placeholder}\"/g\" ./{new_formula_file_name}")
+
+    logging.debug('new homebrew formula {}'.format(new_formula_file_name))
+
+def _create_new_tuistenv_formula_by(tag, sha, url):
+    _create_new_formula(
+        template_name="../tuistenv_template.rb",
+        new_formula_file_name=f"tuistenv@{tag}.rb",
+        formula_placeholder=f"TuistenvAt{tag}".replace(".", ""),
+        sha_placeholder=sha,
+        url_placeholder=url
+    )
+
+def _create_new_tuist_formula_by(tag, sha, url):
+    _create_new_formula(
+        template_name="../tuist_template.rb",
+        new_formula_file_name=f"tuist@{tag}.rb",
+        formula_placeholder=f"TuistAt{tag}".replace(".", ""),
+        sha_placeholder=sha,
+        url_placeholder=url
+    )
+
+def _create_new_formulas_by(tag):
+    # package_url = f"https://github.com/danibachar/tuist/archive/refs/tags/{tag}.tar.gz" #
+    package_url = f"https://github.com/danibachar/WorkflowTagTests/archive/refs/tags/{tag}.tar.gz" # 
+    os.system(f"curl {package_url} -o package.zip -s")
+    new_sha = _run_command("shasum -a 256 package.zip | cut -d ' ' -f 1")
+
+    _create_new_tuist_formula_by(tag, new_sha, package_url)
+    _create_new_tuistenv_formula_by(tag, new_sha, package_url)
+
+# MARK: - Git operations
 
 def _get_tag():
     # fetch all tags
@@ -50,22 +96,16 @@ def _checkout_branch_by(tag):
     os.system(f'git checkout -b {branch}')
     logging.debug('new branch {}'.format(branch))
     return branch
-    
-def _create_formula_file_by(tag):
-    # create a new file
-    # TuistAT3260
-    new_formula_file_name = f"tuist@{tag}.rb"
-    os.system(f'mv {template_name} ./{new_formula_file_name}')
-    logging.debug('new homebrew formula {}'.format(new_formula_file_name))
-    return new_formula_file_name
 
 def _commit_and_push(branch, message):
     # stage changes
     os.system('git add .')
     # commit changes
-    os.system(f'git commit -m {message}')
+    os.system(f'git commit -m \"{message}\"')
     # push changes
     os.system(f'git push --set-upstream origin {branch}')
+
+# MARK: - GitHub Operations
 
 def _github_auth():
     logging.debug('Starting Authentication')
@@ -100,8 +140,8 @@ _set_logging()
 tag = _get_tag()
 _prepare_repo_locally()
 branch = _checkout_branch_by(tag)
-formula_file_name = _create_formula_file_by(tag)
-_commit_and_push(branch=branch, message=f"New Formula {formula_file_name}")
+_create_new_formulas_by(tag)
+_commit_and_push(branch=branch, message=f"New Release {tag}")
 g = _github_auth()
-_create_pr(g, branch=branch, title=f'Release {tag}')
+_create_pr_with(g, branch=branch, title=f'Release {tag}')
 
