@@ -2,6 +2,7 @@
 
 import os, re, logging, subprocess
 from github import Github, Auth
+from sys import platform
 
 # Constants
 full_repo_name = "danibachar/HomebrewAutoDeplyment"
@@ -11,6 +12,7 @@ branch_prefix = 'release'
 # MARK: - Helpers
 
 def _run_command(command):
+    logging.debug(f"Running command {command}")
     return subprocess.run(command, shell=True, capture_output=True, text=True).stdout
 
 def _set_logging():
@@ -38,10 +40,19 @@ def _create_new_formula(
         Formula SHA {sha_placeholder}
         Formula URL {url_placeholder}
         ''')
-    os.system(f'cp {template_name} ./{new_formula_file_name}')
-    os.system(f"sed -ir \"s/_FORMULA_/{formula_placeholder}/g\" ./{new_formula_file_name}")
-    os.system(f"sed -ir \"s/_SHA_/\"{sha_placeholder}\"/g\" ./{new_formula_file_name}")
-    os.system(f"sed -ir \"s/_URL_/\"{url_placeholder}\"/g\" ./{new_formula_file_name}")
+    
+    _run_command(f'cp {template_name} ./{new_formula_file_name}')
+
+    if platform == "linux" or platform == "linux2":
+        _run_command(f"sed -i 's|_FORMULA_|{formula_placeholder}|g' {new_formula_file_name}")
+        _run_command(f"sed -i 's|_SHA_|\"{sha_placeholder}\"|g' {new_formula_file_name}")
+        _run_command(f"sed -i 's|_URL_|\"{url_placeholder}\"|g' {new_formula_file_name}")
+    elif platform == "darwin":
+        _run_command(f"sed -i '' 's|_FORMULA_|{formula_placeholder}|g' {new_formula_file_name}")
+        _run_command(f"sed -i '' 's|_SHA_|\"{sha_placeholder}\"|g' {new_formula_file_name}")
+        _run_command(f"sed -i '' 's|_URL_|\"{url_placeholder}\"|g' {new_formula_file_name}")
+    else:
+        raise Exception(f"Not supported platform {platform}")
 
     logging.debug(f'New Homebrew formula created successfully at {new_formula_file_name}')
 
@@ -67,7 +78,7 @@ def _create_new_formulas_by(tag):
     # package_url = f"https://github.com/danibachar/tuist/archive/refs/tags/{tag}.tar.gz" #
     package_url = f"https://github.com/danibachar/WorkflowTagTests/archive/refs/tags/{tag}.tar.gz" # 
     os.system(f"curl {package_url} -o package.zip -s")
-    new_sha = _run_command("shasum -a 256 package.zip | cut -d ' ' -f 1")
+    new_sha = _run_command("shasum -a 256 package.zip | cut -d ' ' -f 1").strip()
 
     _create_new_tuist_formula_by(tag, new_sha, package_url)
     _create_new_tuistenv_formula_by(tag, new_sha, package_url)
@@ -127,14 +138,14 @@ def _github_auth():
     return g
 
 def _create_pr_with(g, branch, title):
-    logging.debug('Creating PR')
+    logging.debug(f'Creating PR from branch {branch}')
     # get the repo by name
     repo = g.get_repo(full_repo_name)
     # create a GitHub pull request
     pr = repo.create_pull(
         title=title,
         body='Created from automated script',
-        head=f"{branch}",
+        head=branch,
         base='main'
     )
     logging.info(f"created new PR {pr}")
@@ -148,7 +159,7 @@ tag = _get_tag()
 _prepare_repo_locally()
 branch = _checkout_branch_by(tag)
 _create_new_formulas_by(tag)
-_commit_and_push(branch=branch, message=f"New Release {tag}")
-g = _github_auth()
-_create_pr_with(g, branch=branch, title=f'Release {tag}')
+# _commit_and_push(branch=branch, message=f"New Release {tag}")
+# g = _github_auth()
+# _create_pr_with(g, branch=branch, title=f'Release {tag}')
 
