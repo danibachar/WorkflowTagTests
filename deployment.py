@@ -77,7 +77,7 @@ def _create_new_tuist_formula_by(tag, sha, url):
 def _create_new_formulas_by(tag):
     # package_url = f"https://github.com/danibachar/tuist/archive/refs/tags/{tag}.tar.gz" #
     package_url = f"https://github.com/danibachar/WorkflowTagTests/archive/refs/tags/{tag}.tar.gz" # 
-    os.system(f"curl {package_url} -o package.zip -s")
+    _run_command(f"curl {package_url} -o package.zip -s")
     new_sha = _run_command("shasum -a 256 package.zip | cut -d ' ' -f 1").strip()
 
     _create_new_tuist_formula_by(tag, new_sha, package_url)
@@ -102,32 +102,34 @@ def _get_tag():
 def _prepare_repo_locally():
     # clone the git repo
     logging.debug('cloning {}'.format(repo_url))
-    os.system(f'git clone {repo_url}')
+    _run_command(f'git clone {repo_url}')
     # navigate into the cloned repo (given the default clone command, the folder name would be the repository name)
     repo_name = repo_url.split('/')[-1].replace('.git', '')
     os.chdir(repo_name)
+    _run_command("git config --local user.email \"$GIT_AUTHOR_EMAIL\"")
+    _run_command("git config --local user.name \"$GITLAB_USER_ID\"")
 
 def _checkout_branch_by(tag):
     # create branch name from the latest tag
     branch = "{}_{}".format(branch_prefix, tag)
     # create and checkout new branch
-    os.system(f'git checkout -b {branch}')
+    _run_command(f'git checkout -b {branch}')
     logging.debug('new branch {}'.format(branch))
     return branch
 
 def _commit_and_push(branch, message):
     # stage changes
-    os.system('git add .')
+    _run_command('git add .')
     # commit changes
-    os.system(f'git commit -m \"{message}\"')
+    _run_command(f'git commit -m \"{message}\"')
     # push changes
-    os.system(f'git push --set-upstream origin {branch}')
+    _run_command(f'git push --set-upstream origin {branch}')
 
 # MARK: - GitHub Operations
-access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
+
 def _github_auth():
     logging.debug('Starting Authentication')
-    
+    access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
     if access_token is None:
         raise Exception("No access token, cannot authenticate with GitHub")
     # using an access token
@@ -161,26 +163,25 @@ branch = _checkout_branch_by(tag)
 _create_new_formulas_by(tag)
 _commit_and_push(branch=branch, message=f"New Release {tag}")
 g = _github_auth()
-# _create_pr_with(g, branch=branch, title=f'Release {tag}')
-logging.debug(f'Creating PR from branch {branch}')
-# get the repo by name
-repo = g.get_repo(full_repo_name)
-# create a GitHub pull request
-pr_command = f'''
-curl -L \
-  -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer {access_token}" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/danibachar/HomebrewAutoDeplyment/pulls \
-  -d '{{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"{branch}","base":"main"}}'
-'''
-pr = _run_command(pr_command)
-# pr = repo.create_pull(
-#     title=f"Release {tag}",
-#     body='Created from automated script',
-#     head=f"danibachar:{branch}",
-#     base='main'
-# )
-logging.info(f"created new PR {pr}")
-
+_create_pr_with(g, branch=branch, title=f'Release {tag}')
+# logging.debug(f'Creating PR from branch {branch}')
+# # get the repo by name
+# repo = g.get_repo(full_repo_name)
+# # create a GitHub pull request
+# pr_command = f'''
+# curl -L \
+#   -X POST \
+#   -H "Accept: application/vnd.github+json" \
+#   -H "Authorization: Bearer {access_token}" \
+#   -H "X-GitHub-Api-Version: 2022-11-28" \
+#   https://api.github.com/repos/danibachar/HomebrewAutoDeplyment/pulls \
+#   -d '{{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"{branch}","base":"main"}}'
+# '''
+# pr = _run_command(pr_command)
+# # pr = repo.create_pull(
+# #     title=f"Release {tag}",
+# #     body='Created from automated script',
+# #     head=f"danibachar:{branch}",
+# #     base='main'
+# # )
+# logging.info(f"created new PR {pr}")
