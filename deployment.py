@@ -8,6 +8,9 @@ from sys import platform
 full_repo_name = "danibachar/HomebrewAutoDeplyment"
 repo_url = f'https://github.com/{full_repo_name}'
 branch_prefix = 'release'
+access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
+if access_token is None:
+    raise Exception("No access token, cannot authenticate with GitHub")
 
 # MARK: - Helpers
 
@@ -126,15 +129,14 @@ def _commit_and_push(branch, message):
     # commit changes
     _run_command(f'git commit -m \"{message}\"')
     # push changes
-    logging.debug(_run_command(f'git push {branch}'))
+    logging.debug(_run_command(f"git remote add origin https://danibachar:{access_token}@github.com/{full_repo_name} "))
+    
+    logging.debug(_run_command(f'git push --set-upstream origin {branch}'))
 
 # MARK: - GitHub Operations
 
 def _github_auth():
     logging.debug('Starting Authentication')
-    access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
-    if access_token is None:
-        raise Exception("No access token, cannot authenticate with GitHub")
     # using an access token
     auth = Auth.Token(access_token)
     # Public Web Github
