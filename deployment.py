@@ -161,5 +161,16 @@ branch = _checkout_branch_by(tag)
 _create_new_formulas_by(tag)
 _commit_and_push(branch=branch, message=f"New Release {tag}")
 g = _github_auth()
-_create_pr_with(g, branch=branch, title=f'Release {tag}')
+# _create_pr_with(g, branch=branch, title=f'Release {tag}')
+logging.debug(f'Creating PR from branch {branch}')
+# get the repo by name
+repo = g.get_repo(full_repo_name)
+# create a GitHub pull request
+pr = repo.create_pull(
+    title=f"Release {tag}",
+    body='Created from automated script',
+    head=branch,
+    base='main'
+)
+logging.info(f"created new PR {pr}")
 
