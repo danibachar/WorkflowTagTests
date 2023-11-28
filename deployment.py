@@ -31,12 +31,19 @@ def _create_new_formula(
     sha_placeholder,
     url_placeholder
 ):
+    logging.debug(f'''
+        Creating formula from {template_name}
+        New formula file {new_formula_file_name}
+        Formula rb name {formula_placeholder}
+        Formula SHA {sha_placeholder}
+        Formula URL {url_placeholder}
+        ''')
     os.system(f'cp {template_name} ./{new_formula_file_name}')
     os.system(f"sed -ir \"s/_FORMULA_/{formula_placeholder}/g\" ./{new_formula_file_name}")
     os.system(f"sed -ir \"s/_SHA_/\"{sha_placeholder}\"/g\" ./{new_formula_file_name}")
     os.system(f"sed -ir \"s/_URL_/\"{url_placeholder}\"/g\" ./{new_formula_file_name}")
 
-    logging.debug('new homebrew formula {}'.format(new_formula_file_name))
+    logging.debug(f'New Homebrew formula created successfully at {new_formula_file_name}')
 
 def _create_new_tuistenv_formula_by(tag, sha, url):
     _create_new_formula(
@@ -127,7 +134,7 @@ def _create_pr_with(g, branch, title):
     pr = repo.create_pull(
         title=title,
         body='Created from automated script',
-        head=branch,
+        head=f"{branch}",
         base='main'
     )
     logging.info(f"created new PR {pr}")
