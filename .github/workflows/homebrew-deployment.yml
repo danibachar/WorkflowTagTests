@@ -20,6 +20,6 @@ jobs:
       - name: Dependencies
         run: pip3 install -r requirements.txt
       - name: Deploy new Homebrew formula
-        run: python3 -u make/homebrew/release-formulas.py
+        run: python3 -u make/tasks/homebrew/release-formulas.py
       # - name: Setup upterm session
       #   uses: lhotari/action-upterm@v1
