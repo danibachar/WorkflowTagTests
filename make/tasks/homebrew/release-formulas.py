@@ -7,7 +7,7 @@ from sys import platform
 # Env vars
 target_repo_name = os.environ.get("TARGET_REPO_NAME", None)
 if target_repo_name is None:
-    raise Exception("target repo name")
+    raise Exception("No target repo name")
 
 access_token = os.environ.get("GITHUB_ACCESS_TOKEN", None)
 if access_token is None:
