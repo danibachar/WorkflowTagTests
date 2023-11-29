@@ -11,7 +11,7 @@ on:
 
 env:
   LOG_LEVEL: DEBUG
-  DANIEL_GITHUB_ACCESS_TOKEN: ${{ secrets.DANIEL_GITHUB_ACCESS_TOKEN }}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.DANIEL_GITHUB_ACCESS_TOKEN }}
   TARGET_REPO_NAME: danibachar/HomebrewAutoDeplyment
 jobs:
   build_and_deploy:
