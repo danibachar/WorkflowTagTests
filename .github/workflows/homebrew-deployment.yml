@@ -1,13 +1,13 @@
 name: Deployment
-on:
-  push:
-    tags:
-      - '*'
-
-# on: 
+# on:
 #   push:
-#     # only trigger on branches, not on tags
-#     branches: 'main'
+#     tags:
+#       - '*'
+
+on: 
+  push:
+    # only trigger on branches, not on tags
+    branches: 'main'
 
 env:
   LOG_LEVEL: DEBUG

@@ -122,12 +122,13 @@ def _commit_and_push(branch, message):
     logging.debug(_run_command(f"git remote set-url origin https://danibachar:{access_token}@github.com/{full_repo_name}"))
     # stage changes
     _run_command('git add .')
+    logging.debug(_run_command(f'git status'))
     # commit changes
     _run_command(f'git commit -m \"{message}\"')
+    logging.debug(_run_command(f'git status'))
     # push changes
-    # logging.debug(_run_command(f"git remote add origin https://danibachar:{access_token}@github.com/{full_repo_name}"))
-    
     logging.debug(_run_command(f'git push --set-upstream origin {branch}'))
+    logging.debug(_run_command(f'git status'))
 
 # MARK: - GitHub Operations
 
