@@ -124,12 +124,13 @@ def _checkout_branch_by(tag):
     return branch
 
 def _commit_and_push(branch, message):
+    logging.debug(_run_command(f"git remote set-url origin https://danibachar:{access_token}@github.com/{full_repo_name}"))
     # stage changes
     _run_command('git add .')
     # commit changes
     _run_command(f'git commit -m \"{message}\"')
     # push changes
-    logging.debug(_run_command(f"git remote add origin https://danibachar:{access_token}@github.com/{full_repo_name} "))
+    # logging.debug(_run_command(f"git remote add origin https://danibachar:{access_token}@github.com/{full_repo_name}"))
     
     logging.debug(_run_command(f'git push --set-upstream origin {branch}'))
 
