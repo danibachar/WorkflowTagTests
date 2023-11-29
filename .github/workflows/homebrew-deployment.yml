@@ -1,13 +1,13 @@
 name: Deployment
-# on:
-#   push:
-#     tags:
-#       - '*'
-
-on: 
+on:
   push:
-    # only trigger on branches, not on tags
-    branches: 'main'
+    tags:
+      - '*'
+
+# on: 
+#   push:
+#     # only trigger on branches, not on tags
+#     branches: 'main'
 
 env:
   LOG_LEVEL: DEBUG
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Dependencies
         run: pip3 install -r requirements.txt
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
       - name: Deploy new Homebrew formula
         run: python3 -u deployment.py
+      # - name: Setup upterm session
+      #   uses: lhotari/action-upterm@v1

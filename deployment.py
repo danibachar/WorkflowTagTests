@@ -8,6 +8,7 @@ from sys import platform
 full_repo_name = "danibachar/HomebrewAutoDeplyment"
 repo_url = f'https://github.com/{full_repo_name}'
 branch_prefix = 'release'
+
 access_token = os.environ.get("DANIEL_GITHUB_ACCESS_TOKEN", None)
 if access_token is None:
     raise Exception("No access token, cannot authenticate with GitHub")
@@ -110,6 +111,11 @@ def _prepare_repo_locally():
     repo_name = repo_url.split('/')[-1].replace('.git', '')
     os.chdir(repo_name)
 
+    email = "some@hotmail.com"
+    user = os.environ.get("GITHUB_REPOSITORY_OWNER")
+    _run_command(f"git config --local user.email {email}")
+    _run_command(f"git config --local user.name {user}")
+
 def _checkout_branch_by(tag):
     # create branch name from the latest tag
     branch = "{}_{}".format(branch_prefix, tag)
@@ -119,16 +125,14 @@ def _checkout_branch_by(tag):
     return branch
 
 def _commit_and_push(branch, message):
-    logging.debug(_run_command(f"git remote set-url origin https://danibachar:{access_token}@github.com/{full_repo_name}"))
+    # Preparing for push
+    _run_command(f"git remote set-url origin https://danibachar:{access_token}@github.com/{full_repo_name}")
     # stage changes
     _run_command('git add .')
-    logging.debug(_run_command(f'git status'))
     # commit changes
     _run_command(f'git commit -m \"{message}\"')
-    logging.debug(_run_command(f'git status'))
     # push changes
-    logging.debug(_run_command(f'git push --set-upstream origin {branch}'))
-    logging.debug(_run_command(f'git status'))
+    _run_command(f'git push --set-upstream origin {branch}')
 
 # MARK: - GitHub Operations
 
