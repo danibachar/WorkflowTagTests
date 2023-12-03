@@ -1,26 +1,24 @@
-name: Deployment
-on:
-  push:
-    tags:
-      - '*'
-
-# on: 
+# name: Deployment
+# on:
 #   push:
-#     # only trigger on branches, not on tags
-#     branches: 'main'
+#     tags:
+#       - '*'
+
+on: 
+  push:
+    # only trigger on branches, not on tags
+    branches: 'main'
 
 env:
   LOG_LEVEL: DEBUG
-  GITHUB_ACCESS_TOKEN: ${{ secrets.DANIEL_GITHUB_ACCESS_TOKEN }}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
   TARGET_REPO_NAME: danibachar/HomebrewAutoDeplyment
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Dependencies
-        run: pip3 install -r requirements.txt
       - name: Deploy new Homebrew formula
-        run: python3 -u make/tasks/homebrew/release-formulas.py
+        run: ./deploy.sh
       # - name: Setup upterm session
       #   uses: lhotari/action-upterm@v1
