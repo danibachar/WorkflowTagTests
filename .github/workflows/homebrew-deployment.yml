@@ -19,6 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Deploy new Homebrew formula
-        run: .make/tasks/homebrew/deploy.sh
+        run: ./make/tasks/homebrew/deploy.sh
       # - name: Setup upterm session
       #   uses: lhotari/action-upterm@v1
